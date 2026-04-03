@@ -204,7 +204,7 @@ watch(selectedFriend, async (newVal) => {
     socket.emit('seen message', {
       senderId: newVal.id,
       receiverId: currentUserId
-    }) // 👈 Gửi tín hiệu đã xem
+    })
     nextTick(scrollToBottom)
   }
 })
@@ -263,7 +263,7 @@ const fetchMessages = async (friendId) => {
 
     const msgList = await getMessageList(currentUserId, friendId)
 
-    // 🟡 Sắp xếp tin nhắn theo thời gian tăng dần
+    // Sắp xếp tin nhắn theo thời gian tăng dần
     const sorted = msgList.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
 
       messages.value[friendId] = sorted.map((msg) => ({
@@ -277,14 +277,14 @@ const fetchMessages = async (friendId) => {
     await nextTick()
     scrollToBottom()
 
-    // 👇 Gửi tín hiệu đã xem ngay nếu đang xem đoạn chat
+    //  Gửi tín hiệu đã xem ngay nếu đang xem đoạn chat
     if (selectedFriend.value?.id === friendId) {
       socket.emit('seen message', {
         senderId: friendId,
         receiverId: currentUserId
       })
 
-      // 👇 Đánh dấu seen ngay tại client (để không cần đợi server phản hồi)
+      //  Đánh dấu seen ngay tại client (để không cần đợi server phản hồi)
       messages.value[friendId] = messages.value[friendId].map((msg) => ({
         ...msg,
         seen: msg.fromMe ? true : msg.seen
@@ -337,7 +337,7 @@ onMounted(async () => {
           online: true
         }
       } catch (err) {
-        console.warn(`❌ Lỗi khi lấy thông tin người dùng ${friend.id}:`, err)
+        console.warn(` Lỗi khi lấy thông tin người dùng ${friend.id}:`, err)
         return {
           id: friend.id,
           name: 'Ẩn danh',
@@ -363,7 +363,7 @@ const sendMessage = async () => {
   formData.append('content', newMessage.value || '')
   if (selectedImage.value) {
     formData.append('image', selectedImage.value)
-      console.log('📤 Hình ảnh gửi đi:', selectedImage.value)
+      console.log('Hình ảnh gửi đi:', selectedImage.value)
   }
 
   try {
@@ -393,7 +393,7 @@ const sendMessage = async () => {
     await nextTick()
     setTimeout(() => scrollToBottom(), 50)
   } catch (err) {
-    console.error('❌ Lỗi khi gửi tin nhắn:', err)
+    console.error('Lỗi khi gửi tin nhắn:', err)
   }
 }
 
@@ -442,7 +442,7 @@ onMounted(() => {
 
     // socket.on('chat messsage', (data) => {
     //   const { message, from } = data
-    //   console.log('📥 Tin nhắn realtime:', message)
+    //   console.log('Tin nhắn realtime:', message)
 
     //   if (!messages.value[from]) {
     //     messages.value[from] = []
@@ -461,12 +461,12 @@ onMounted(() => {
     //   }
     // })
 
-    // ✅ CHÈN Ở ĐÂY
+    // CHÈN Ở ĐÂY
     socket.on('update-user-status', ({ userId, online }) => {
       const index = friends.value.findIndex((f) => f.id === Number(userId));
       if (index !== -1) {
         friends.value[index].online = online;
-        friends.value = [...friends.value]; // ✅ Bắt buộc để force re-render
+        friends.value = [...friends.value]; // Bắt buộc để force re-render
       }
     });
     socket.on('message seen', ({ senderId }) => {
@@ -477,14 +477,14 @@ onMounted(() => {
           return msg
         })
 
-        // ✅ Nếu đang mở đúng đoạn chat, thì ép Vue cập nhật lại đúng phần hiển thị
+        //  Nếu đang mở đúng đoạn chat, thì ép Vue cập nhật lại đúng phần hiển thị
         if (Number(selectedFriend.value?.id) === Number(senderId)) {
           messages.value = {
             ...messages.value,
             [senderId]: updated
           }
         } else {
-          // ✅ Nếu không phải đoạn chat đang mở, chỉ update ở memory
+          // Nếu không phải đoạn chat đang mở, chỉ update ở memory
           messages.value[senderId] = updated
         }
       }
